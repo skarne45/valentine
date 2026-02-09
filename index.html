@@ -23,11 +23,13 @@
   overflow:hidden;
 }
     .wrap{
-      height:100%;
-      display:grid;
-      place-items:center;
-      padding:24px;
-    }
+  height:100%;
+  display:flex;
+  align-items:flex-end;     /* push content to bottom */
+  justify-content:center;   /* center horizontally */
+  padding:24px;
+  padding-bottom:60px;      /* space from bottom */
+}
     .card{
       position:relative;
       width:min(560px, 92vw);
