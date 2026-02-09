@@ -56,6 +56,19 @@ canvas{
   position:fixed;
   inset:0;
   z-index:1;
+  display:none; /* hidden until YES */
+}
+.overlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:3;
+  text-align:center;
+}
+.overlay h2{
+  font-size:34px;
 }
 </style>
 </head>
@@ -71,11 +84,16 @@ canvas{
   <button id="no">No 🙈</button>
 </div>
 
+<div class="overlay" id="msg">
+  <h2>Yay!! I love you 💞</h2>
+</div>
+
 <script>
 /* HEART RAIN */
 const canvas = document.getElementById("hearts");
 const ctx = canvas.getContext("2d");
-let w,h;
+let w,h,hearts=[],running=false;
+
 function resize(){
   w=canvas.width=window.innerWidth;
   h=canvas.height=window.innerHeight;
@@ -83,14 +101,12 @@ function resize(){
 window.addEventListener("resize",resize);
 resize();
 
-const hearts=[];
 function createHeart(){
   hearts.push({
     x:Math.random()*w,
     y:-20,
-    s:Math.random()*20+10,
-    v:Math.random()*2+1,
-    a:Math.random()*Math.PI
+    s:Math.random()*18+12,
+    v:Math.random()*2+1
   });
 }
 function drawHeart(x,y,s){
@@ -106,6 +122,7 @@ function drawHeart(x,y,s){
   ctx.restore();
 }
 function animate(){
+  if(!running) return;
   ctx.clearRect(0,0,w,h);
   if(Math.random()<0.4) createHeart();
   hearts.forEach((p,i)=>{
@@ -115,7 +132,14 @@ function animate(){
   });
   requestAnimationFrame(animate);
 }
-animate();
+
+/* YES BUTTON */
+document.getElementById("yes").addEventListener("click",()=>{
+  canvas.style.display="block";
+  running=true;
+  animate();
+  document.getElementById("msg").style.display="flex";
+});
 
 /* NO BUTTON RUN AWAY */
 const no=document.getElementById("no");
