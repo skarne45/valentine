@@ -4,189 +4,193 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Valentine?</title>
+
   <style>
     :root{
-      --bg1:#120018;
-      --bg2:#2a0033;
-      --card:#ffffff10;
       --text:#fff;
       --accent:#ff4d88;
-      --accent2:#ffcc66;
+      --card: rgba(0,0,0,0.40);
+      --border: rgba(255,255,255,0.18);
     }
-    *{box-sizing:border-box}
-    html,body{height:100%; margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
     body{
-  background:
-    linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.65)),
-    url("IMG_1025.heic") center / cover no-repeat fixed;
-  color:var(--text);
-  overflow:hidden;
-}
-    .wrap{
-  height:100%;
-  display:flex;
-  align-items:flex-end;     /* push content to bottom */
-  justify-content:center;   /* center horizontally */
-  padding:24px;
-  padding-bottom:60px;      /* space from bottom */
-}
-    .card{
-      position:relative;
-      width:min(560px, 92vw);
-      padding:28px 22px;
-      border-radius:18px;
-      background: var(--card);
-      backdrop-filter: blur(10px);
-      border:1px solid #ffffff20;
-      box-shadow: 0 20px 60px #00000055;
-      text-align:center;
-    }
-    h1{
-      margin:0 0 10px;
-      font-size: clamp(26px, 4vw, 38px);
-      line-height:1.15;
-      letter-spacing:.2px;
-    }
-    .sub{
-      margin:0 0 20px;
-      opacity:.9;
-      font-size: clamp(14px, 2.2vw, 16px);
-    }
-    .btnRow{
-      display:flex;
-      gap:12px;
-      justify-content:center;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
-    button{
-      border:0;
-      padding:14px 18px;
-      border-radius:14px;
-      font-size:18px;
-      font-weight:700;
-      cursor:pointer;
-      min-width:130px;
-      transition: transform .12s ease, filter .12s ease;
-      user-select:none;
-      touch-action: manipulation;
-    }
-    button:active{transform: scale(0.98)}
-    #yesBtn{
-      background: linear-gradient(135deg, var(--accent), #ff2f6d);
-      color:white;
-      box-shadow: 0 14px 30px #ff2f6d45;
-    }
-    #noBtn{
-      background: linear-gradient(135deg, #ffffff20, #ffffff10);
-      color:#fff;
-      border:1px solid #ffffff25;
-      position: absolute; /* so we can move it around */
-      left: 50%;
-      top: calc(50% + 110px);
-      transform: translateX(-50%);
-      min-width:130px;
-      backdrop-filter: blur(10px);
+      /* ✅ background photo + dark overlay */
+      background:
+        linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.65)),
+        url("background.jpg") center / cover no-repeat fixed;
+      color:var(--text);
+      overflow:hidden;
     }
 
-    .hint{
-      margin-top:16px;
-      font-size:13px;
-      opacity:.75;
-    }
-
-    /* full-screen fireworks canvas */
-    #fxCanvas{
+    /* Heart canvas (behind UI, above background) */
+    #heartCanvas{
       position:fixed;
       inset:0;
       width:100vw;
       height:100vh;
-      display:none;
+      display:none;           /* only after YES */
       pointer-events:none;
+      z-index:1;
     }
 
-    /* overlay message on yes */
-    .overlay{
+    /* Bottom UI wrapper */
+    .ui{
       position:fixed;
-      inset:0;
+      left:0; right:0; bottom:0;
+      padding:18px 16px 22px;
+      display:flex;
+      justify-content:center;
+      z-index:2; /* above canvas */
+    }
+
+    .panel{
+      width:min(820px, 96vw);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+      padding:14px 14px 12px;
+    }
+
+    /* Success message (hidden until YES) */
+    .success{
       display:none;
-      place-items:center;
       text-align:center;
-      padding:24px;
+      padding:10px 12px;
+      border-radius:14px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.12);
+      margin-bottom:10px;
     }
-    .overlay .bubble{
-      width:min(620px, 92vw);
-      padding:22px 18px;
-      border-radius:18px;
-      background:#00000055;
-      border:1px solid #ffffff22;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 20px 60px #00000070;
+    .success h2{
+      margin:0 0 4px;
+      font-size: 22px;
+      line-height:1.2;
     }
-    .overlay h2{
-      margin:0 0 8px;
-      font-size: clamp(22px, 3.6vw, 34px);
-    }
-    .overlay p{
+    .success p{
       margin:0;
-      font-size: clamp(14px, 2.2vw, 17px);
-      opacity:.95;
+      font-size: 14px;
+      opacity:0.95;
     }
-    .tiny{
-      margin-top:12px;
+    .success .tiny{
+      margin-top:6px;
       font-size:12px;
-      opacity:.8;
+      opacity:0.85;
+    }
+
+    .question{
+      text-align:center;
+      margin: 4px 0 10px;
+      font-size: clamp(20px, 3.6vw, 30px);
+      font-weight: 800;
+      line-height:1.15;
+      letter-spacing: .2px;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.45);
+    }
+
+    .sub{
+      text-align:center;
+      margin:0 0 12px;
+      font-size: 14px;
+      opacity:0.9;
+    }
+
+    .btnRow{
+      position:relative;
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      padding-bottom: 6px;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:0;
+      padding:12px 18px;
+      border-radius:14px;
+      font-size:16px;
+      font-weight:800;
+      cursor:pointer;
+      min-width:120px;
+      transition: transform .12s ease, filter .12s ease;
+      user-select:none;
+      touch-action: manipulation;
+    }
+    button:active{ transform: scale(0.98); }
+
+    #yesBtn{
+      background: linear-gradient(135deg, var(--accent), #ff2f6d);
+      color:white;
+      box-shadow: 0 14px 30px rgba(255,47,109,0.30);
+    }
+
+    #noBtn{
+      background: rgba(255,255,255,0.14);
+      color:#fff;
+      border:1px solid rgba(255,255,255,0.22);
+      backdrop-filter: blur(10px);
+      position:relative;  /* stays inside bottom bar only */
+    }
+
+    .hint{
+      text-align:center;
+      margin-top:6px;
+      font-size:12px;
+      opacity:0.75;
     }
   </style>
 </head>
+
 <body>
-  <canvas id="fxCanvas"></canvas>
+  <canvas id="heartCanvas"></canvas>
 
-  <div class="wrap">
-   <div class="card" id="card">
-</div>
-      <h1>Will you be my valentine, honey? ❤️❤️❤️</h1>
-      <p class="sub">Choose wisely 😌</p>
-
-      <div class="btnRow">
-        <button id="yesBtn">Yes 💖</button>
+  <!-- ✅ All text/buttons are in the bottom bar (no faces covered) -->
+  <div class="ui">
+    <div class="panel" id="panel">
+      <div class="success" id="successMsg">
+        <h2>Yay!! 💞💥</h2>
+        <p>You just made my whole day. Happy Valentine’s, honey! 🥰</p>
+        <div class="tiny">(Tap anywhere to make more hearts)</div>
       </div>
 
-      <!-- No button positioned absolutely so it can run away -->
-      <button id="noBtn" aria-label="No">No 🙈</button>
+      <div class="question">Will you be my valentine, honey? ❤️❤️❤️</div>
+      <div class="sub">Choose wisely 😌</div>
+
+      <div class="btnRow" id="btnRow">
+        <button id="yesBtn">Yes 💖</button>
+        <button id="noBtn" aria-label="No">No 🙈</button>
+      </div>
 
       <div class="hint">Tip: The “No” button is shy.</div>
     </div>
   </div>
 
-  <div class="overlay" id="overlay">
-    <div class="bubble">
-      <h2>Yay!! 💞💥</h2>
-      <p>You just made my whole day. Happy Valentine’s, honey! 🥰</p>
-      <div class="tiny">(Tap anywhere to replay fireworks)</div>
-    </div>
-  </div>
-
 <script>
 (() => {
-  // ---------- "No" button that won't work ----------
-  const noBtn = document.getElementById('noBtn');
-  const card = document.getElementById('card');
+  /* ------------------ No button runs away (ONLY inside bottom panel) ------------------ */
+  const noBtn  = document.getElementById('noBtn');
+  const panel  = document.getElementById('panel');
+  const btnRow = document.getElementById('btnRow');
 
   function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
 
-  function moveNoButtonAway(fromX, fromY){
-    const cardRect = card.getBoundingClientRect();
-    const btnRect = noBtn.getBoundingClientRect();
+  function moveNoInsidePanel(fromX, fromY){
+    const panelRect = panel.getBoundingClientRect();
+    const btnRect   = noBtn.getBoundingClientRect();
 
-    // Compute a target position inside the card area (keep it visible)
     const padding = 14;
-    const minX = cardRect.left + padding;
-    const maxX = cardRect.right - btnRect.width - padding;
-    const minY = cardRect.top + padding + 60;
-    const maxY = cardRect.bottom - btnRect.height - padding;
 
-    // bias movement away from pointer
+    // limit movement to within the panel area, near the button row region
+    const minX = panelRect.left + padding;
+    const maxX = panelRect.right - btnRect.width - padding;
+
+    // restrict y to the button row zone to avoid overlapping question text
+    const rowRect = btnRow.getBoundingClientRect();
+    const minY = rowRect.top - 6;
+    const maxY = rowRect.bottom - btnRect.height + 6;
+
     const currentX = btnRect.left;
     const currentY = btnRect.top;
 
@@ -195,42 +199,48 @@
     const len = Math.hypot(dx, dy) || 1;
     dx /= len; dy /= len;
 
-    // step away + random jitter
-    const step = 120 + Math.random() * 120;
-    let targetX = currentX + dx * step + (Math.random() * 120 - 60);
-    let targetY = currentY + dy * step + (Math.random() * 120 - 60);
+    const step = 90 + Math.random() * 120;
+    let targetX = currentX + dx * step + (Math.random() * 90 - 45);
+    let targetY = currentY + dy * step + (Math.random() * 40 - 20);
 
     targetX = clamp(targetX, minX, maxX);
     targetY = clamp(targetY, minY, maxY);
 
-    // convert to absolute position within viewport
+    // make button "float" in viewport coordinates
+    noBtn.style.position = "fixed";
     noBtn.style.left = (targetX + btnRect.width/2) + "px";
     noBtn.style.top  = (targetY + btnRect.height/2) + "px";
     noBtn.style.transform = "translate(-50%, -50%)";
+    noBtn.style.zIndex = 3;
   }
 
-  // Run away on hover/move (desktop) and on touch start (mobile)
-  noBtn.addEventListener('mouseenter', (e) => moveNoButtonAway(e.clientX, e.clientY));
-  noBtn.addEventListener('mousemove',  (e) => moveNoButtonAway(e.clientX, e.clientY));
+  // desktop
+  noBtn.addEventListener('mouseenter', (e) => moveNoInsidePanel(e.clientX, e.clientY));
+  noBtn.addEventListener('mousemove',  (e) => moveNoInsidePanel(e.clientX, e.clientY));
+  // mobile
   noBtn.addEventListener('touchstart', (e) => {
     const t = e.touches[0];
-    moveNoButtonAway(t.clientX, t.clientY);
+    moveNoInsidePanel(t.clientX, t.clientY);
     e.preventDefault();
   }, {passive:false});
-
-  // If user somehow clicks it, it still "won't work"
+  // if clicked somehow
   noBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    moveNoButtonAway(e.clientX, e.clientY);
+    moveNoInsidePanel(e.clientX, e.clientY);
   });
 
-  // ---------- Fireworks / cracker blast on YES ----------
+  /* ------------------ Heart rain (starts after YES) ------------------ */
   const yesBtn = document.getElementById('yesBtn');
-  const canvas = document.getElementById('fxCanvas');
-  const overlay = document.getElementById('overlay');
+  const successMsg = document.getElementById('successMsg');
+
+  const canvas = document.getElementById('heartCanvas');
   const ctx = canvas.getContext('2d');
 
-  let W, H, dpr;
+  let dpr=1, W=0, H=0;
+  let hearts = [];
+  let running = false;
+  let animId = null;
+
   function resize(){
     dpr = Math.max(1, window.devicePixelRatio || 1);
     W = canvas.width = Math.floor(window.innerWidth * dpr);
@@ -242,77 +252,81 @@
   window.addEventListener('resize', resize);
   resize();
 
-  // particles
-  const particles = [];
   function rand(min,max){ return Math.random()*(max-min)+min; }
 
-  function burst(x,y, count=140){
-    for(let i=0;i<count;i++){
-      const angle = rand(0, Math.PI*2);
-      const speed = rand(2.5, 8.5);
-      particles.push({
-        x, y,
-        vx: Math.cos(angle)*speed,
-        vy: Math.sin(angle)*speed,
-        g: 0.06,
-        life: rand(40, 90),
-        r: rand(1.5, 3.2),
-        hue: rand(0, 360),
-        alpha: 1
+  function spawnHearts(n=6){
+    for(let i=0;i<n;i++){
+      hearts.push({
+        x: rand(0, window.innerWidth),
+        y: rand(-120, -10),
+        vy: rand(1.8, 4.2),
+        vx: rand(-0.6, 0.6),
+        s:  rand(10, 24),
+        rot: rand(0, Math.PI*2),
+        vr:  rand(-0.02, 0.02),
+        a:   rand(0.65, 1)
       });
     }
   }
 
-  let animId = null;
-  function draw(){
-    ctx.clearRect(0,0,window.innerWidth, window.innerHeight);
-    // soft fade trail
-    ctx.fillStyle = "rgba(0,0,0,0.18)";
+  function drawHeart(x,y,size,rot,alpha){
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(rot);
+    ctx.globalAlpha = alpha;
+    ctx.scale(size/30, size/30);
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.bezierCurveTo(-12, -12, -30, 8, 0, 28);
+    ctx.bezierCurveTo(30, 8, 12, -12, 0, 0);
+    ctx.fillStyle = "rgba(255,77,136,1)";
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function loop(){
+    if(!running) return;
+
+    // light trail
+    ctx.fillStyle = "rgba(0,0,0,0.10)";
     ctx.fillRect(0,0,window.innerWidth, window.innerHeight);
 
-    for(let i=particles.length-1;i>=0;i--){
-      const p = particles[i];
-      p.vy += p.g;
-      p.x += p.vx;
-      p.y += p.vy;
-      p.life -= 1;
-      p.alpha = Math.max(0, p.life/90);
+    if(Math.random() < 0.60) spawnHearts(5);
 
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      ctx.fillStyle = `hsla(${p.hue}, 100%, 60%, ${p.alpha})`;
-      ctx.fill();
+    for(let i=hearts.length-1;i>=0;i--){
+      const h = hearts[i];
+      h.x += h.vx;
+      h.y += h.vy;
+      h.rot += h.vr;
 
-      if(p.life <= 0 || p.y > window.innerHeight+50) particles.splice(i,1);
+      drawHeart(h.x, h.y, h.s, h.rot, h.a);
+
+      if(h.y > window.innerHeight + 80) hearts.splice(i, 1);
     }
 
-    if(particles.length > 0){
-      animId = requestAnimationFrame(draw);
-    } else {
-      // keep overlay, stop animation
-      animId = null;
-    }
+    animId = requestAnimationFrame(loop);
   }
 
-  function startFireworks(){
+  function startHearts(){
     canvas.style.display = "block";
-    overlay.style.display = "grid";
-
-    // multiple bursts across screen for "cracker blast"
-    const midX = window.innerWidth/2;
-    const midY = window.innerHeight/2;
-
-    burst(midX, midY, 170);
-    setTimeout(() => burst(rand(80, window.innerWidth-80), rand(120, window.innerHeight*0.6), 160), 180);
-    setTimeout(() => burst(rand(80, window.innerWidth-80), rand(120, window.innerHeight*0.6), 160), 360);
-    setTimeout(() => burst(rand(80, window.innerWidth-80), rand(120, window.innerHeight*0.6), 160), 540);
-    setTimeout(() => burst(rand(80, window.innerWidth-80), rand(120, window.innerHeight*0.6), 160), 720);
-
-    if(!animId) draw();
+    ctx.clearRect(0,0,window.innerWidth, window.innerHeight);
+    hearts = [];
+    running = true;
+    if(!animId) loop();
   }
 
-  yesBtn.addEventListener('click', () => startFireworks());
-  overlay.addEventListener('click', () => startFireworks());
+  yesBtn.addEventListener('click', () => {
+    successMsg.style.display = "block";
+    startHearts();
+  });
+
+  // tap anywhere to add a burst (nice touch)
+  document.addEventListener('click', (e) => {
+    if(!running) return;
+    spawnHearts(18);
+  });
 })();
 </script>
 </body>
